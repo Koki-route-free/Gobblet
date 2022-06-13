@@ -115,6 +115,7 @@ def input_coordinate(player: int):
       except (ValueError, AssertionError):
           pass
 
+
 # ゲームが終わる条件
 def finish_game():
   board_2d = d_board_2d()
@@ -168,31 +169,91 @@ def print_judgment():
 
 # 手持ちとボードの確認と実行
 def conduct_game(player:int, v:int, w:int, x:int, y:int, z:int):
+  wz = z * -1
   if board_3d[y][x][z-1]==EMPTY:
-      wz = z * -1
-      if player==BLACK:
-          black_hand = hand_1d(black_hand_2d)
-          if w==8 and z in black_hand:
-              b_index = black_hand.index(z)
-              black_hand_2d[b_index].remove(z)
-              board_3d[y][x][z-1] = z
-              return True
-          elif board_3d[w][v][z-1]==z:
-              board_3d[w][v][z-1] = EMPTY
-              board_3d[y][x][z-1] = z
-              return True
-      elif player==WHITE:
-          white_hand = hand_1d(white_hand_2d) 
-          if w == 8 and wz in white_hand:
-              w_index = white_hand.index(wz)
-              white_hand_2d[w_index].remove(wz)
-              board_3d[y][x][z-1] = wz
-              return True
-          elif board_3d[w][v][z-1]==wz:
-              board_3d[w][v][z-1] = EMPTY
-              board_3d[y][x][z-1] = wz
-              return True
-  return False
+    if all(i==EMPTY for i in board_3d[y][x]):
+        if player==BLACK:
+            black_hand = hand_1d(black_hand_2d)
+            if w==8 and z in black_hand:
+                b_index = black_hand.index(z)
+                black_hand_2d[b_index].remove(z)
+                board_3d[y][x][z-1] = z
+                return True
+            elif board_3d[w][v][z-1]==z:
+                board_3d[w][v][z-1] = EMPTY
+                board_3d[y][x][z-1] = z
+                return True
+        elif player==WHITE:
+            white_hand = hand_1d(white_hand_2d) 
+            if w == 8 and wz in white_hand:
+                w_index = white_hand.index(wz)
+                white_hand_2d[w_index].remove(wz)
+                board_3d[y][x][z-1] = wz
+                return True
+            elif board_3d[w][v][z-1]==wz:
+                board_3d[w][v][z-1] = EMPTY
+                board_3d[y][x][z-1] = wz
+                return True
+    else:
+        board_2d = d_board_2d()
+        if player==BLACK:
+            horizontal = sum(i < 0 for i in board_2d[y])
+            vertical = 0
+            for i in range(4):
+                if board_2d[i][x]<0:
+                    vertical += 1
+            diagonal = 0
+            if y==x:
+                for i in range(4):
+                    if board_2d[i][i]<0:
+                        diagonal += 1 
+            elif y==3-x:
+                for i in range(4):
+                    if board_2d[i][3-i]<0:
+                        diagonal += 1
+            if horizontal<3 and vertical<3 and diagonal<3:
+                return False
+            else:
+                black_hand = hand_1d(black_hand_2d)
+                if w==8 and z in black_hand:
+                    b_index = black_hand.index(z)
+                    black_hand_2d[b_index].remove(z)
+                    board_3d[y][x][z-1] = z
+                    return True
+                elif board_3d[w][v][z-1]==z:
+                    board_3d[w][v][z-1] = EMPTY
+                    board_3d[y][x][z-1] = z
+                    return True
+        elif player==WHITE:
+            horizontal = sum(i > 0 for i in board_2d[y])
+            vertical = 0
+            for i in range(4):
+                if board_2d[i][x]>0:
+                    vertical += 1
+            diagonal = 0
+            if y==x:
+                for i in range(4):
+                    if board_2d[i][i]>0:
+                        diagonal += 1 
+            elif y==3-x:
+                for i in range(4):
+                    if board_2d[i][3-i]>0:
+                        diagonal += 1
+            if horizontal<3 and vertical<3 and diagonal<3:
+                return False
+            else:
+                white_hand = hand_1d(white_hand_2d) 
+                if w == 8 and wz in white_hand:
+                    w_index = white_hand.index(wz)
+                    white_hand_2d[w_index].remove(wz)
+                    board_3d[y][x][z-1] = wz
+                    return True
+                elif board_3d[w][v][z-1]==wz:
+                    board_3d[w][v][z-1] = EMPTY
+                    board_3d[y][x][z-1] = wz
+                    return True
+  else:
+        return False
 
 # 座標入力を正しくできるまで繰り返す
 def input_disk(player: int):
