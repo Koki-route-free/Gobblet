@@ -37,13 +37,22 @@ board_3d = [
 
 
 # コマとプレイヤーの表示方法
-disk_character = {EMPTY:"  -", B1:" B1", B2:" B2", B3:" B3", B4:" B4", W1:" W1", W2:" W2", W3:" W3", W4:" W4"}
+disk_character = {EMPTY:"  -", B1:" B1", B2:" B2", B3:" B3", B4:" B4", W1:" W1", W2:" W2", W3:" W3", W4:" W4", }
 player_name = {BLACK: "BLACK : ", WHITE: "WHITE : "}
 
 # 最初の手持ちのコマ
-black_hand = [B1, B1, B2, B2, B3, B3, B4, B4]
-white_hand = [W1, W1, W2, W2, W3, W3, W4, W4]
-hand = {BLACK: black_hand, WHITE: white_hand}
+black_hand_2d = [[B1, B2, B3, B4], [B1, B2, B3, B4], [B1, B2, B3, B4]]
+white_hand_2d = [[W1, W2, W3, W4], [W1, W2, W3, W4], [W1, W2, W3, W4]]
+
+# 手札を3つに分け一番大き物だけ表示、ない場合は00を表示
+def hand_1d(hand_2d):
+    hand = []
+    for row in hand_2d:
+        if not row:
+            hand.append(EMPTY)
+        else:
+            hand.append(row[-1])
+    return hand
 
 # 2次元の表示配置 (一番上に見えているものを表示)
 def d_board_2d():
@@ -63,7 +72,7 @@ def d_board_2d():
               board_line.append(disk[0])
       board_2d.append(board_line)
   return board_2d
-    
+
 # ゲームボードの表示
 def print_board():
   print()
@@ -79,7 +88,11 @@ def print_board():
 # 手持ちの表示
 def print_hand(player: int):
   str_hand = player_name[player]
-  for i in hand[player]:
+  if player>0:
+      hand = hand_1d(black_hand_2d)
+  else:
+      hand = hand_1d(white_hand_2d)
+  for i in hand:
       str_hand += disk_character[i]
   print(str_hand)
     
@@ -158,17 +171,21 @@ def conduct_game(player:int, v:int, w:int, x:int, y:int, z:int):
   if board_3d[y][x][z-1]==EMPTY:
       wz = z * -1
       if player==BLACK:
+          black_hand = hand_1d(black_hand_2d)
           if w==8 and z in black_hand:
-              black_hand.remove(z)
+              b_index = black_hand.index(z)
+              black_hand_2d[b_index].remove(z)
               board_3d[y][x][z-1] = z
               return True
           elif board_3d[w][v][z-1]==z:
               board_3d[w][v][z-1] = EMPTY
               board_3d[y][x][z-1] = z
               return True
-      elif player==WHITE: 
+      elif player==WHITE:
+          white_hand = hand_1d(white_hand_2d) 
           if w == 8 and wz in white_hand:
-              white_hand.remove(wz)
+              w_index = white_hand.index(wz)
+              white_hand_2d[w_index].remove(wz)
               board_3d[y][x][z-1] = wz
               return True
           elif board_3d[w][v][z-1]==wz:
